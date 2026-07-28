@@ -22,21 +22,6 @@ def download_fig(fig, filename="plot.png", text="Download Plot"):
 def dollar_formatter(x, pos):
     return f"${x:,.0f}"
 
-
-def ci_ellipse(x, y, edgecolor="k"):
-    """95% confidence ellipse on the current axes. Source: Matplotlib."""
-    mean = np.array([np.mean(x), np.mean(y)])
-    cov = np.cov(x, y)
-    eigenvalues, eigenvectors = np.linalg.eig(cov)
-    angle = np.arctan2(eigenvectors[1, 0], eigenvectors[0, 0])
-    width = 2 * np.sqrt(eigenvalues[0]) * np.sqrt(5.991)
-    height = 2 * np.sqrt(eigenvalues[1]) * np.sqrt(5.991)
-    ellipse = Ellipse(xy=mean, width=width, height=height,
-                      angle=np.rad2deg(angle), edgecolor=edgecolor, fc='None', lw=1)
-    plt.gca().add_patch(ellipse)
-    return ellipse
-
-
 def plot_ce_plane(dalys, costs, region, perspective, sim):
     fig, ax = plt.subplots(figsize=(10, 6))
     ax.scatter(dalys, costs, s=0.5, color="g", alpha=.5)
