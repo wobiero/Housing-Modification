@@ -61,7 +61,42 @@ def plot_ce_plane(dalys, costs, region, perspective, sim):
     ax.set_xlabel(r"$\Delta$ DALYs", fontweight="bold")
     return fig
 
-
+def ci_ellipse(x, y, ax=None, edgecolor='red', facecolor='none', linestyle='-', linewidth=2):
+    """Plot confidence interval ellipse for cost-effectiveness plane."""
+    if ax is None:
+        ax = plt.gca()
+    
+    # Handle cases with insufficient data
+    if len(x) < 3 or len(y) < 3:
+        return
+    
+    mean = np.array([np.mean(x), np.mean(y)])
+    cov = np.cov(x, y)
+    
+    # Check for valid covariance
+    if np.isnan(cov).any() or np.isinf(cov).any():
+        return
+    
+    # Use eigh for symmetric matrices (more stable)
+    try:
+        eigenvalues, eigenvectors = np.linalg.eigh(cov)
+    except np.linalg.LinAlgError:
+        return
+    
+    # Ensure eigenvalues are positive (add small regularization)
+    eigenvalues = np.maximum(eigenvalues, 1e-10)
+    
+    # Use first eigenvector for angle
+    angle = np.arctan2(eigenvectors[1, 0], eigenvectors[0, 0])
+    
+    width = 2 * np.sqrt(eigenvalues[0]) * np.sqrt(5.991)
+    height = 2 * np.sqrt(eigenvalues[1]) * np.sqrt(5.991)
+    
+    ellipse = Ellipse(xy=mean, width=width, height=height, 
+                     angle=np.degrees(angle),
+                     edgecolor=edgecolor, facecolor=facecolor,
+                     linestyle=linestyle, linewidth=linewidth)
+    ax.add_patch(ellipse)
 def plot_tornado_diagram(tornado_results, base_nmb, region_name):
     tornado_results.sort(key=lambda x: x['nmb_range'], reverse=True)
     fig, ax = plt.subplots(figsize=(12, 8))
